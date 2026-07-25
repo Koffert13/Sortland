@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sortland · schema juli–augusti 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* Blåbyen: fjorden, husfasaderna, midnattssolen, norrskenet */
+  --ground:#071726;
+  --surface:#0D2739;
+  --surface-2:#143650;
+  --rule:#1E4966;
+  --text:#E4F0F8;
+  --muted:#7CA3BF;
+  --facade:#2F79B5;
+  --day:#F5BE55;      /* midnattssol */
+  --eve:#EF7FA3;      /* kvällsljus över sundet */
+  --night:#63E0C4;    /* norrsken */
+  --free:#12354C;
+  --display:"Bricolage Grotesque","Trebuchet MS",system-ui,sans-serif;
+  --body:"Inter",system-ui,-apple-system,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--ground);color:var(--text);font-family:var(--body);
+  -webkit-font-smoothing:antialiased;padding:0 0 48px
+}
+.wrap{max-width:620px;margin:0 auto;padding:0 16px}
+
+/* ---------- panorama ---------- */
+.pano{display:block;width:100%;max-width:620px;margin:0 auto;height:auto}
+
+/* ---------- header ---------- */
+header{padding:16px 0 18px}
+.kicker{
+  font-family:var(--mono);font-size:11px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--muted);margin:0 0 6px
+}
+h1{
+  font-family:var(--display);font-weight:800;font-size:clamp(30px,9vw,44px);
+  line-height:.95;letter-spacing:-.035em;margin:0
+}
+h1 em{font-style:normal;color:var(--facade)}
+.months{display:flex;gap:6px;margin-top:18px}
+.months button{
+  flex:1;padding:11px 8px;border-radius:11px;border:1px solid var(--rule);
+  background:transparent;color:var(--muted);font-family:var(--body);
+  font-weight:600;font-size:14px;cursor:pointer;transition:.18s
+}
+.months button[aria-pressed="true"]{background:var(--surface-2);color:var(--text);border-color:var(--facade)}
+
+/* ---------- datumremsa ---------- */
+.strip{
+  display:flex;gap:6px;overflow-x:auto;padding:16px 16px 10px;margin:0 -16px;
+  scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;scrollbar-width:none
+}
+.strip::-webkit-scrollbar{display:none}
+.chip{
+  flex:0 0 auto;width:46px;padding:8px 0 9px;border-radius:12px;border:1px solid var(--rule);
+  background:var(--surface);color:var(--muted);text-align:center;cursor:pointer;
+  scroll-snap-align:center;transition:.15s
+}
+.chip .dw{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;display:block}
+.chip .dn{font-family:var(--display);font-weight:600;font-size:19px;line-height:1.1;display:block;color:var(--text)}
+.chip .dots{display:flex;gap:2px;justify-content:center;margin-top:5px;height:4px}
+.chip .dots i{width:4px;height:4px;border-radius:50%;background:var(--free)}
+.chip[aria-selected="true"]{background:#EAF4FB;border-color:#EAF4FB}
+.chip[aria-selected="true"] .dn,.chip[aria-selected="true"] .dw{color:#071726}
+.chip.weekend .dw{color:var(--eve)}
+
+/* ---------- dagsribban ---------- */
+.daybar{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:14px 0 4px}
+.daybar h2{font-family:var(--display);font-weight:800;font-size:22px;letter-spacing:-.02em;margin:0}
+.arrows{display:flex;gap:6px}
+.arrows button{
+  width:34px;height:34px;border-radius:10px;border:1px solid var(--rule);
+  background:var(--surface);color:var(--text);font-size:15px;cursor:pointer;line-height:1
+}
+.meta{font-family:var(--mono);font-size:11px;color:var(--muted);margin:0 0 3px;line-height:1.6}
+.meta .sun{color:var(--day)}
+.axis{
+  display:flex;justify-content:space-between;font-family:var(--mono);font-size:9px;
+  color:var(--muted);padding:0 0 4px;margin-left:64px;letter-spacing:.05em
+}
+.rows{border-top:1px solid var(--rule)}
+.row{
+  display:grid;grid-template-columns:64px 1fr;align-items:center;gap:8px;
+  padding:7px 0;border-bottom:1px solid var(--rule);cursor:pointer
+}
+.row:focus-visible{outline:2px solid var(--day);outline-offset:2px}
+.who{font-weight:600;font-size:12.5px;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.track{
+  position:relative;height:30px;border-radius:8px;overflow:hidden;
+  background-image:linear-gradient(90deg,rgba(255,255,255,.10) 1px,transparent 1px),var(--sky,var(--surface));
+  background-size:25% 100%,100% 100%
+}
+.bar{
+  position:absolute;top:3px;bottom:3px;border-radius:6px;display:flex;align-items:center;
+  padding:0 6px;overflow:hidden;font-family:var(--mono);font-size:9.5px;font-weight:600;
+  color:#071726;white-space:nowrap;box-shadow:0 1px 6px rgba(0,0,0,.35)
+}
+.bar.day{background:var(--day)}
+.bar.eve{background:var(--eve)}
+.bar.night{background:var(--night)}
+.bar.long::after{
+  content:"";position:absolute;inset:0;
+  background:repeating-linear-gradient(115deg,rgba(7,23,38,.17) 0 5px,transparent 5px 11px)
+}
+.bar.spill{opacity:.34;border-radius:0 6px 6px 0;left:0!important;box-shadow:none}
+.bar .cont{margin-left:auto;opacity:.7}
+.now{position:absolute;top:0;bottom:0;width:2px;background:#fff;opacity:.8;z-index:3}
+.free{font-family:var(--mono);font-size:10px;color:var(--muted);position:absolute;left:8px;top:50%;transform:translateY(-50%)}
+.soloing .row{opacity:.3}
+.soloing .row.on{opacity:1}
+
+/* ---------- teckenförklaring ---------- */
+.legend{display:flex;flex-wrap:wrap;gap:10px 16px;margin:16px 0 4px}
+.legend span{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted)}
+.legend i{width:11px;height:11px;border-radius:3px;display:block}
+
+/* ---------- månadsrutnät ---------- */
+.section-h{
+  font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--muted);margin:38px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--rule)
+}
+.grid{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:10px}
+.grid th{color:var(--muted);font-weight:400;padding:0 0 8px;text-align:center;font-size:9.5px;letter-spacing:.06em}
+.grid th:first-child{text-align:left;width:52px}
+.grid td{padding:0;height:20px}
+.grid td:first-child{color:var(--muted);white-space:nowrap;font-size:9.5px;padding-right:6px}
+.grid tr.we td:first-child{color:var(--eve);opacity:.85}
+.cell{display:flex;gap:1.5px;justify-content:center;padding:2px 1.5px}
+.cell b{display:block;height:15px;flex:1;border-radius:3px;background:var(--free)}
+.cell b.day{background:var(--day)}
+.cell b.eve{background:var(--eve)}
+.cell b.night{background:var(--night)}
+.grid tbody tr{cursor:pointer}
+.grid tbody tr.sel{background:var(--surface-2);outline:1px solid var(--facade)}
+.grid tbody tr.sel td:first-child{color:var(--text)}
+
+footer{margin-top:34px;font-size:10.5px;color:var(--muted);line-height:1.7;border-top:1px solid var(--rule);padding-top:14px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+<svg class="pano" viewBox="0 0 800 210" role="img" aria-label="Sortlandsundet med fjäll, blå husfasader och Sortlandsbrua">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#071726"/>
+      <stop offset=".55" stop-color="#12405F"/>
+      <stop offset=".86" stop-color="#3E6E8E"/>
+      <stop offset="1" stop-color="#C98C6E"/>
+    </linearGradient>
+    <linearGradient id="water" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0F3A55"/>
+      <stop offset="1" stop-color="#071726"/>
+    </linearGradient>
+    <radialGradient id="glow">
+      <stop offset="0" stop-color="#F5BE55" stop-opacity=".55"/>
+      <stop offset="1" stop-color="#F5BE55" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="800" height="150" fill="url(#sky)"/>
+  <circle cx="196" cy="140" r="52" fill="url(#glow)"/>
+  <circle cx="196" cy="140" r="11" fill="#FBD98C"/>
+
+  <!-- bakre fjällkedja -->
+  <path d="M0 150 L0 106 L46 78 L74 92 L108 58 L138 84 L166 70 L198 96 L236 62 L268 88 L300 74 L336 100 L372 82 L410 104 L452 86 L498 108 L546 90 L590 110 L640 94 L690 112 L740 98 L800 116 L800 150 Z"
+        fill="#123A57" opacity=".85"/>
+  <!-- främre fjäll, Møysalens taggiga profil -->
+  <path d="M0 150 L0 128 L38 114 L70 126 L104 96 L134 118 L170 108 L206 130 L246 112 L292 132 L340 120 L392 136 L448 124 L512 138 L580 128 L648 140 L720 132 L800 142 L800 150 Z"
+        fill="#0B2941"/>
+
+  <!-- sundet -->
+  <rect y="150" width="800" height="60" fill="url(#water)"/>
+  <path d="M0 150 L800 150" stroke="#2F79B5" stroke-opacity=".35" stroke-width="1"/>
+  <g stroke="#7CC3E8" stroke-opacity=".22" stroke-width="1.5">
+    <path d="M120 162 h58"/><path d="M300 158 h40"/><path d="M420 170 h72"/>
+    <path d="M540 160 h34"/><path d="M96 178 h44"/><path d="M640 176 h50"/><path d="M220 186 h64"/>
+  </g>
+  <!-- midnattssolens spegling -->
+  <g fill="#F5BE55" opacity=".5">
+    <rect x="190" y="154" width="12" height="2.5" rx="1"/>
+    <rect x="186" y="162" width="20" height="2.5" rx="1"/>
+    <rect x="190" y="171" width="13" height="2.5" rx="1"/>
+    <rect x="184" y="181" width="24" height="2.5" rx="1"/>
+  </g>
+
+  <!-- Sortlandsbrua -->
+  <g stroke="#8FC4E4" stroke-opacity=".9" fill="none" stroke-width="2.4">
+    <path d="M560 150 Q660 116 800 128"/>
+  </g>
+  <g stroke="#8FC4E4" stroke-opacity=".45" stroke-width="1.4">
+    <path d="M612 133 v17"/><path d="M660 125 v25"/><path d="M712 123 v27"/><path d="M762 125 v25"/>
+  </g>
+
+  <!-- blåbyen: fasader längs stranden, tända fönster -->
+  <g>
+    <g fill="#2F79B5"><rect x="40" y="130" width="26" height="20"/><path d="M38 130 L53 120 L68 130 Z"/></g>
+    <g fill="#3C90CE"><rect x="72" y="134" width="20" height="16"/><path d="M70 134 L82 126 L94 134 Z"/></g>
+    <g fill="#245F92"><rect x="98" y="128" width="30" height="22"/><path d="M96 128 L113 118 L130 128 Z"/></g>
+    <g fill="#3C90CE"><rect x="134" y="136" width="18" height="14"/><path d="M132 136 L143 129 L154 136 Z"/></g>
+    <g fill="#2F79B5"><rect x="240" y="132" width="24" height="18"/><path d="M238 132 L252 123 L266 132 Z"/></g>
+    <g fill="#245F92"><rect x="270" y="136" width="18" height="14"/><path d="M268 136 L279 129 L290 136 Z"/></g>
+    <g fill="#F5BE55" opacity=".85">
+      <rect x="46" y="136" width="4" height="5"/><rect x="56" y="136" width="4" height="5"/>
+      <rect x="104" y="134" width="4" height="5"/><rect x="116" y="134" width="4" height="5"/>
+      <rect x="78" y="139" width="4" height="5"/><rect x="246" y="138" width="4" height="5"/>
+      <rect x="256" y="138" width="4" height="5"/><rect x="276" y="141" width="4" height="4"/>
+    </g>
+  </g>
+</svg>
+
+<div class="wrap">
+  <header>
+    <p class="kicker">Blåbyen ved sundet · 68°42′N</p>
+    <h1>Vem jobbar<br><em>när?</em></h1>
+    <div class="months" id="months"></div>
+  </header>
+
+  <div class="strip" id="strip" aria-label="Välj dag"></div>
+
+  <div class="daybar">
+    <h2 id="dayTitle">—</h2>
+    <div class="arrows">
+      <button id="prev" aria-label="Föregående dag">‹</button>
+      <button id="next" aria-label="Nästa dag">›</button>
+    </div>
+  </div>
+  <p class="meta" id="summary"></p>
+  <p class="meta" id="light"></p>
+
+  <div class="axis"><span>00</span><span>06</span><span>12</span><span>18</span><span>24</span></div>
+  <div class="rows" id="rows"></div>
+
+  <div class="legend">
+    <span><i style="background:var(--day)"></i>Dag</span>
+    <span><i style="background:var(--eve)"></i>Kväll</span>
+    <span><i style="background:var(--night)"></i>Natt</span>
+    <span><i style="background:var(--free)"></i>Ledig</span>
+    <span><i style="background:repeating-linear-gradient(115deg,#F5BE55 0 3px,#071726 3px 6px)"></i>Långpass 10 h+</span>
+  </div>
+
+  <p class="section-h" id="monthHead">Hela månaden</p>
+  <table class="grid" id="grid"></table>
+
+  <footer id="foot"></footer>
+</div>
+
+<script>
+const DATA = {"Juli": {"people": ["Johannes", "Nicklas", "Evelina", "Hanna", "Hector", "Lucas"], "days": [{"date": "2026-07-01", "dow": "Ons", "shifts": {"Johannes": [], "Nicklas": [], "Evelina": [], "Hanna": [], "Hector": [], "Lucas": []}}, {"date": "2026-07-02", "dow": "Tor", "shifts": {"Johannes": [], "Nicklas": [], "Evelina": [], "Hanna": [], "Hector": [], "Lucas": []}}, {"date": "2026-07-03", "dow": "Fre", "shifts": {"Johannes": [], "Nicklas": [], "Evelina": [], "Hanna": [], "Hector": [], "Lucas": []}}, {"date": "2026-07-04", "dow": "Lör", "shifts": {"Johannes": [], "Nicklas": [], "Evelina": [], "Hanna": [], "Hector": [], "Lucas": []}}, {"date": "2026-07-05", "dow": "Sön", "shifts": {"Johannes": [], "Nicklas": [], "Evelina": [], "Hanna": [], "Hector": [], "Lucas": []}}, {"date": "2026-07-06", "dow": "Mån", "shifts": {"Johannes": [], "Nicklas": [], "Evelina": [], "Hanna": [], "Hector": [], "Lucas": []}}, {"date": "2026-07-07", "dow": "Tis", "shifts": {"Johannes": [], "Nicklas": [], "Evelina": [], "Hanna": [], "Hector": [], "Lucas": []}}, {"date": "2026-07-08", "dow": "Ons", "shifts": {"Johannes": [], "Nicklas": [], "Evelina": [], "Hanna": [], "Hector": [], "Lucas": []}}, {"date": "2026-07-09", "dow": "Tor", "shifts": {"Johannes": [], "Nicklas": [], "Evelina": [], "Hanna": [], "Hector": [], "Lucas": []}}, {"date": "2026-07-10", "dow": "Fre", "shifts": {"Johannes": [], "Nicklas": [], "Evelina": [], "Hanna": [], "Hector": [], "Lucas": []}}, {"date": "2026-07-11", "dow": "Lör", "shifts": {"Johannes": [], "Nicklas": [], "Evelina": [], "Hanna": [], "Hector": [], "Lucas": []}}, {"date": "2026-07-12", "dow": "Sön", "shifts": {"Johannes": [], "Nicklas": [], "Evelina": [], "Hanna": [], "Hector": [], "Lucas": []}}, {"date": "2026-07-13", "dow": "Mån", "shifts": {"Johannes": [], "Nicklas": [{"code": "DC", "start": "07:30", "end": "14:00", "s": 450, "e": 840}], "Evelina": [], "Hanna": [], "Hector": [], "Lucas": [{"code": "DF1", "start": "07:30", "end": "15:00", "s": 450, "e": 900}]}}, {"date": "2026-07-14", "dow": "Tis", "shifts": {"Johannes": [], "Nicklas": [{"code": "DC", "start": "07:30", "end": "14:00", "s": 450, "e": 840}], "Evelina": [{"code": "N", "start": "22:00", "end": "07:30", "s": 1320, "e": 450}], "Hanna": [], "Hector": [], "Lucas": [{"code": "K5", "start": "15:30", "end": "21:30", "s": 930, "e": 1290}]}}, {"date": "2026-07-15", "dow": "Ons", "shifts": {"Johannes": [], "Nicklas": [{"code": "KB", "start": "15:00", "end": "21:30", "s": 900, "e": 1290}], "Evelina": [{"code": "N", "start": "22:00", "end": "07:30", "s": 1320, "e": 450}], "Hanna": [], "Hector": [], "Lucas": [{"code": "N1", "start": "21:45", "end": "07:45", "s": 1305, "e": 465}]}}, {"date": "2026-07-16", "dow": "Tor", "shifts": {"Johannes": [], "Nicklas": [], "Evelina": [{"code": "N", "start": "22:00", "end": "07:30", "s": 1320, "e": 450}], "Hanna": [], "Hector": [], "Lucas": []}}, {"date": "2026-07-17", "dow": "Fre", "shifts": {"Johannes": [], "Nicklas": [{"code": "KA", "start": "15:00", "end": "22:00", "s": 900, "e": 1320}], "Evelina": [], "Hanna": [], "Hector": [], "Lucas": []}}, {"date": "2026-07-18", "dow": "Lör", "shifts": {"Johannes": [], "Nicklas": [{"code": "D16", "start": "07:30", "end": "15:00", "s": 450, "e": 900}], "Evelina": [{"code": "KG", "start": "15:30", "end": "22:00", "s": 930, "e": 1320}], "Hanna": [], "Hector": [], "Lucas": [{"code": "DH1", "start": "07:30", "end": "15:00", "s": 450, "e": 900}, {"code": "KH2", "start": "15:30", "end": "21:30", "s": 930, "e": 1290}]}}, {"date": "2026-07-19", "dow": "Sön", "shifts": {"Johannes": [], "Nicklas": [{"code": "D16", "start": "07:30", "end": "15:00", "s": 450, "e": 900}], "Evelina": [{"code": "N", "start": "22:00", "end": "07:30", "s": 1320, "e": 450}], "Hanna": [], "Hector": [], "Lucas": [{"code": "DH2", "start": "08:00", "end": "14:00", "s": 480, "e": 840}]}}, {"date": "2026-07-20", "dow": "Mån", "shifts": {"Johannes": [], "Nicklas": [{"code": "DD", "start": "07:30", "end": "15:00", "s": 450, "e": 900}], "Evelina": [{"code": "N", "start": "22:00", "end": "07:30", "s": 1320, "e": 450}], "Hanna": [{"code": "KA", "start": "15:00", "end": "22:00", "s": 900, "e": 1320}], "Hector": [], "Lucas": [{"code": "K5", "start": "15:30", "end": "21:30", "s": 930, "e": 1290}]}}, {"date": "2026-07-21", "dow": "Tis", "shifts": {"Johannes": [{"code": "DF1", "start": "07:30", "end": "15:00", "s": 450, "e": 900}], "Nicklas": [], "Evelina": [{"code": "N", "start": "22:00", "end": "07:30", "s": 1320, "e": 450}], "Hanna": [{"code": "DC", "start": "07:30", "end": "14:00", "s": 450, "e": 840}], "Hector": [{"code": "DD", "start": "07:30", "end": "15:00", "s": 450, "e": 900}], "Lucas": [{"code": "N1", "start": "21:45", "end": "07:45", "s": 1305, "e": 465}]}}, {"date": "2026-07-22", "dow": "Ons", "shifts": {"Johannes": [{"code": "K5", "start": "15:30", "end": "21:30", "s": 930, "e": 1290}], "Nicklas": [{"code": "KA", "start": "15:00", "end": "22:00", "s": 900, "e": 1320}], "Evelina": [], "Hanna": [{"code": "DC", "start": "07:30", "end": "14:00", "s": 450, "e": 840}], "Hector": [{"code": "DD", "start": "07:30", "end": "15:00", "s": 450, "e": 900}], "Lucas": []}}, {"date": "2026-07-23", "dow": "Tor", "shifts": {"Johannes": [], "Nicklas": [{"code": "DA", "start": "07:30", "end": "15:30", "s": 450, "e": 930}], "Evelina": [], "Hanna": [], "Hector": [{"code": "KG", "start": "15:30", "end": "22:00", "s": 930, "e": 1320}], "Lucas": []}}, {"date": "2026-07-24", "dow": "Fre", "shifts": {"Johannes": [{"code": "K5", "start": "15:30", "end": "21:30", "s": 930, "e": 1290}], "Nicklas": [{"code": "DF", "start": "07:30", "end": "14:30", "s": 450, "e": 870}], "Evelina": [{"code": "N", "start": "22:00", "end": "07:30", "s": 1320, "e": 450}], "Hanna": [], "Hector": [], "Lucas": [{"code": "N1", "start": "21:45", "end": "07:45", "s": 1305, "e": 465}]}}, {"date": "2026-07-25", "dow": "Lör", "shifts": {"Johannes": [{"code": "LV", "start": "08:30", "end": "21:00", "s": 510, "e": 1260}], "Nicklas": [], "Evelina": [{"code": "N", "start": "22:00", "end": "07:30", "s": 1320, "e": 450}], "Hanna": [{"code": "LV1", "start": "08:00", "end": "20:30", "s": 480, "e": 1230}], "Hector": [], "Lucas": [{"code": "N1", "start": "21:45", "end": "07:45", "s": 1305, "e": 465}]}}, {"date": "2026-07-26", "dow": "Sön", "shifts": {"Johannes": [{"code": "LV", "start": "08:30", "end": "21:00", "s": 510, "e": 1260}], "Nicklas": [], "Evelina": [{"code": "N", "start": "22:00", "end": "07:30", "s": 1320, "e": 450}], "Hanna": [{"code": "LV1", "start": "08:00", "end": "20:30", "s": 480, "e": 1230}], "Hector": [{"code": "D18", "start": "07:30", "end": "14:00", "s": 450, "e": 840}], "Lucas": []}}, {"date": "2026-07-27", "dow": "Mån", "shifts": {"Johannes": [], "Nicklas": [{"code": "KA", "start": "15:00", "end": "22:00", "s": 900, "e": 1320}], "Evelina": [{"code": "N", "start": "22:00", "end": "07:30", "s": 1320, "e": 450}], "Hanna": [], "Hector": [{"code": "DD", "start": "07:30", "end": "15:00", "s": 450, "e": 900}], "Lucas": [{"code": "K", "start": "15:00", "end": "22:00", "s": 900, "e": 1320}]}}, {"date": "2026-07-28", "dow": "Tis", "shifts": {"Johannes": [{"code": "DF", "start": "07:30", "end": "15:30", "s": 450, "e": 930}], "Nicklas": [], "Evelina": [{"code": "N", "start": "22:00", "end": "07:30", "s": 1320, "e": 450}], "Hanna": [{"code": "DA", "start": "07:30", "end": "15:30", "s": 450, "e": 930}], "Hector": [], "Lucas": [{"code": "DF1", "start": "07:30", "end": "15:00", "s": 450, "e": 900}]}}, {"date": "2026-07-29", "dow": "Ons", "shifts": {"Johannes": [{"code": "DF2", "start": "07:30", "end": "14:30", "s": 450, "e": 870}], "Nicklas": [{"code": "DA", "start": "07:30", "end": "15:30", "s": 450, "e": 930}], "Evelina": [], "Hanna": [{"code": "DC", "start": "07:30", "end": "14:00", "s": 450, "e": 840}], "Hector": [{"code": "KG", "start": "15:30", "end": "22:00", "s": 930, "e": 1320}], "Lucas": [{"code": "K5", "start": "15:30", "end": "21:30", "s": 930, "e": 1290}]}}, {"date": "2026-07-30", "dow": "Tor", "shifts": {"Johannes": [], "Nicklas": [{"code": "LVU", "start": "08:00", "end": "21:00", "s": 480, "e": 1260}], "Evelina": [], "Hanna": [{"code": "KC", "start": "15:30", "end": "21:00", "s": 930, "e": 1260}], "Hector": [{"code": "DD", "start": "07:30", "end": "15:00", "s": 450, "e": 900}], "Lucas": []}}, {"date": "2026-07-31", "dow": "Fre", "shifts": {"Johannes": [], "Nicklas": [{"code": "DA", "start": "07:30", "end": "15:30", "s": 450, "e": 930}], "Evelina": [{"code": "N", "start": "22:00", "end": "07:30", "s": 1320, "e": 450}], "Hanna": [{"code": "KC", "start": "15:30", "end": "21:00", "s": 930, "e": 1260}], "Hector": [{"code": "DC", "start": "07:30", "end": "14:00", "s": 450, "e": 840}], "Lucas": []}}]}, "Augusti": {"people": ["Johannes", "Nicklas", "Evelina", "Hanna", "Hector", "Lucas"], "days": [{"date": "2026-08-01", "dow": "Lör", "shifts": {"Johannes": [{"code": "LV", "start": "08:30", "end": "21:00", "s": 510, "e": 1260}], "Nicklas": [{"code": "D16", "start": "07:30", "end": "15:00", "s": 450, "e": 900}], "Evelina": [{"code": "N", "start": "22:00", "end": "07:30", "s": 1320, "e": 450}], "Hanna": [{"code": "D16", "start": "07:30", "end": "15:00", "s": 450, "e": 900}], "Hector": [], "Lucas": [{"code": "LV", "start": "08:30", "end": "21:00", "s": 510, "e": 1260}, {"code": "KH", "start": "15:00", "end": "22:00", "s": 900, "e": 1320}]}}, {"date": "2026-08-02", "dow": "Sön", "shifts": {"Johannes": [{"code": "LV", "start": "08:30", "end": "21:00", "s": 510, "e": 1260}], "Nicklas": [], "Evelina": [{"code": "N", "start": "22:00", "end": "07:30", "s": 1320, "e": 450}], "Hanna": [], "Hector": [{"code": "KG", "start": "15:30", "end": "22:00", "s": 930, "e": 1320}], "Lucas": [{"code": "DH", "start": "07:30", "end": "15:30", "s": 450, "e": 930}, {"code": "LV", "start": "08:30", "end": "21:00", "s": 510, "e": 1260}]}}, {"date": "2026-08-03", "dow": "Mån", "shifts": {"Johannes": [], "Nicklas": [{"code": "KA", "start": "15:00", "end": "22:00", "s": 900, "e": 1320}], "Evelina": [], "Hanna": [{"code": "DC", "start": "07:30", "end": "14:00", "s": 450, "e": 840}], "Hector": [{"code": "DD", "start": "07:30", "end": "15:00", "s": 450, "e": 900}], "Lucas": []}}, {"date": "2026-08-04", "dow": "Tis", "shifts": {"Johannes": [{"code": "DF2", "start": "07:30", "end": "14:30", "s": 450, "e": 870}], "Nicklas": [{"code": "KG", "start": "15:30", "end": "22:00", "s": 930, "e": 1320}], "Evelina": [], "Hanna": [{"code": "KC", "start": "15:30", "end": "21:00", "s": 930, "e": 1260}], "Hector": [], "Lucas": [{"code": "K5", "start": "15:30", "end": "21:30", "s": 930, "e": 1290}]}}, {"date": "2026-08-05", "dow": "Ons", "shifts": {"Johannes": [{"code": "DF2", "start": "07:30", "end": "14:30", "s": 450, "e": 870}], "Nicklas": [{"code": "KG", "start": "15:30", "end": "22:00", "s": 930, "e": 1320}], "Evelina": [{"code": "N", "start": "22:00", "end": "07:30", "s": 1320, "e": 450}], "Hanna": [], "Hector": [{"code": "DA", "start": "07:30", "end": "15:30", "s": 450, "e": 930}], "Lucas": [{"code": "KH1", "start": "15:30", "end": "22:00", "s": 930, "e": 1320}]}}, {"date": "2026-08-06", "dow": "Tor", "shifts": {"Johannes": [{"code": "DF", "start": "07:30", "end": "15:30", "s": 450, "e": 930}], "Nicklas": [{"code": "DC", "start": "07:30", "end": "14:00", "s": 450, "e": 840}], "Evelina": [{"code": "N", "start": "22:00", "end": "07:30", "s": 1320, "e": 450}], "Hanna": [{"code": "KC", "start": "15:30", "end": "21:00", "s": 930, "e": 1260}], "Hector": [{"code": "DD", "start": "07:30", "end": "15:00", "s": 450, "e": 900}], "Lucas": [{"code": "LV", "start": "08:30", "end": "21:00", "s": 510, "e": 1260}]}}, {"date": "2026-08-07", "dow": "Fre", "shifts": {"Johannes": [{"code": "DF1", "start": "07:30", "end": "15:00", "s": 450, "e": 900}], "Nicklas": [{"code": "DF", "start": "07:30", "end": "14:30", "s": 450, "e": 870}], "Evelina": [], "Hanna": [{"code": "DC", "start": "07:30", "end": "14:00", "s": 450, "e": 840}], "Hector": [{"code": "KA", "start": "15:00", "end": "22:00", "s": 900, "e": 1320}], "Lucas": [{"code": "KH1", "start": "15:30", "end": "22:00", "s": 930, "e": 1320}]}}, {"date": "2026-08-08", "dow": "Lör", "shifts": {"Johannes": [], "Nicklas": [], "Evelina": [], "Hanna": [], "Hector": [{"code": "L2", "start": "09:30", "end": "22:00", "s": 570, "e": 1320}], "Lucas": [{"code": "DH1", "start": "07:30", "end": "15:00", "s": 450, "e": 900}]}}, {"date": "2026-08-09", "dow": "Sön", "shifts": {"Johannes": [], "Nicklas": [], "Evelina": [{"code": "N", "start": "22:00", "end": "07:30", "s": 1320, "e": 450}], "Hanna": [], "Hector": [{"code": "L2", "start": "09:30", "end": "22:00", "s": 570, "e": 1320}], "Lucas": [{"code": "DH3", "start": "08:30", "end": "14:00", "s": 510, "e": 840}]}}, {"date": "2026-08-10", "dow": "Mån", "shifts": {"Johannes": [{"code": "K", "start": "15:00", "end": "22:00", "s": 900, "e": 1320}], "Nicklas": [], "Evelina": [{"code": "N", "start": "22:00", "end": "07:30", "s": 1320, "e": 450}], "Hanna": [{"code": "DC", "start": "07:30", "end": "14:00", "s": 450, "e": 840}], "Hector": [], "Lucas": [{"code": "K5", "start": "15:30", "end": "21:30", "s": 930, "e": 1290}]}}, {"date": "2026-08-11", "dow": "Tis", "shifts": {"Johannes": [{"code": "DF1", "start": "07:30", "end": "15:00", "s": 450, "e": 900}], "Nicklas": [], "Evelina": [], "Hanna": [{"code": "DC", "start": "07:30", "end": "14:00", "s": 450, "e": 840}], "Hector": [{"code": "DD", "start": "07:30", "end": "15:00", "s": 450, "e": 900}], "Lucas": [{"code": "K5", "start": "15:30", "end": "21:30", "s": 930, "e": 1290}]}}, {"date": "2026-08-12", "dow": "Ons", "shifts": {"Johannes": [{"code": "K", "start": "15:00", "end": "22:00", "s": 900, "e": 1320}], "Nicklas": [], "Evelina": [], "Hanna": [], "Hector": [{"code": "KA", "start": "15:00", "end": "22:00", "s": 900, "e": 1320}], "Lucas": [{"code": "DF1", "start": "07:30", "end": "15:00", "s": 450, "e": 900}]}}, {"date": "2026-08-13", "dow": "Tor", "shifts": {"Johannes": [{"code": "K", "start": "15:00", "end": "22:00", "s": 900, "e": 1320}], "Nicklas": [], "Evelina": [], "Hanna": [], "Hector": [], "Lucas": [{"code": "DF1", "start": "07:30", "end": "15:00", "s": 450, "e": 900}]}}, {"date": "2026-08-14", "dow": "Fre", "shifts": {"Johannes": [{"code": "K5", "start": "15:30", "end": "21:30", "s": 930, "e": 1290}], "Nicklas": [], "Evelina": [], "Hanna": [{"code": "KA", "start": "15:00", "end": "22:00", "s": 900, "e": 1320}], "Hector": [{"code": "KA", "start": "15:00", "end": "22:00", "s": 900, "e": 1320}], "Lucas": [{"code": "DF2", "start": "07:30", "end": "14:30", "s": 450, "e": 870}]}}, {"date": "2026-08-15", "dow": "Lör", "shifts": {"Johannes": [{"code": "DH", "start": "07:30", "end": "15:30", "s": 450, "e": 930}], "Nicklas": [], "Evelina": [], "Hanna": [{"code": "LV2", "start": "08:30", "end": "21:00", "s": 510, "e": 1260}], "Hector": [{"code": "L3", "start": "07:30", "end": "20:00", "s": 450, "e": 1200}], "Lucas": []}}, {"date": "2026-08-16", "dow": "Sön", "shifts": {"Johannes": [], "Nicklas": [], "Evelina": [], "Hanna": [], "Hector": [{"code": "L3", "start": "07:30", "end": "20:00", "s": 450, "e": 1200}], "Lucas": []}}, {"date": "2026-08-17", "dow": "Mån", "shifts": {"Johannes": [], "Nicklas": [], "Evelina": [], "Hanna": [], "Hector": [], "Lucas": []}}, {"date": "2026-08-18", "dow": "Tis", "shifts": {"Johannes": [], "Nicklas": [], "Evelina": [], "Hanna": [], "Hector": [], "Lucas": []}}, {"date": "2026-08-19", "dow": "Ons", "shifts": {"Johannes": [], "Nicklas": [], "Evelina": [], "Hanna": [], "Hector": [], "Lucas": []}}, {"date": "2026-08-20", "dow": "Tor", "shifts": {"Johannes": [], "Nicklas": [], "Evelina": [], "Hanna": [{"code": "DC", "start": "07:30", "end": "14:00", "s": 450, "e": 840}], "Hector": [], "Lucas": []}}, {"date": "2026-08-21", "dow": "Fre", "shifts": {"Johannes": [], "Nicklas": [], "Evelina": [], "Hanna": [{"code": "KC", "start": "15:30", "end": "21:00", "s": 930, "e": 1260}], "Hector": [], "Lucas": []}}, {"date": "2026-08-22", "dow": "Lör", "shifts": {"Johannes": [], "Nicklas": [], "Evelina": [], "Hanna": [{"code": "KA", "start": "15:00", "end": "22:00", "s": 900, "e": 1320}], "Hector": [], "Lucas": []}}, {"date": "2026-08-23", "dow": "Sön", "shifts": {"Johannes": [], "Nicklas": [], "Evelina": [], "Hanna": [{"code": "KA", "start": "15:00", "end": "22:00", "s": 900, "e": 1320}], "Hector": [], "Lucas": []}}, {"date": "2026-08-24", "dow": "Mån", "shifts": {"Johannes": [], "Nicklas": [], "Evelina": [], "Hanna": [], "Hector": [], "Lucas": []}}, {"date": "2026-08-25", "dow": "Tis", "shifts": {"Johannes": [], "Nicklas": [], "Evelina": [], "Hanna": [], "Hector": [], "Lucas": []}}, {"date": "2026-08-26", "dow": "Ons", "shifts": {"Johannes": [], "Nicklas": [], "Evelina": [], "Hanna": [], "Hector": [], "Lucas": []}}, {"date": "2026-08-27", "dow": "Tor", "shifts": {"Johannes": [], "Nicklas": [], "Evelina": [], "Hanna": [], "Hector": [], "Lucas": []}}, {"date": "2026-08-28", "dow": "Fre", "shifts": {"Johannes": [], "Nicklas": [], "Evelina": [], "Hanna": [], "Hector": [], "Lucas": []}}, {"date": "2026-08-29", "dow": "Lör", "shifts": {"Johannes": [], "Nicklas": [], "Evelina": [], "Hanna": [], "Hector": [], "Lucas": []}}, {"date": "2026-08-30", "dow": "Sön", "shifts": {"Johannes": [], "Nicklas": [], "Evelina": [], "Hanna": [], "Hector": [], "Lucas": []}}, {"date": "2026-08-31", "dow": "Mån", "shifts": {"Johannes": [], "Nicklas": [], "Evelina": [], "Hanna": [], "Hector": [], "Lucas": []}}]}};
+const MONTHS = Object.keys(DATA);
+const MN = {Juli:"juli", Augusti:"augusti"};
+const PEOPLE = DATA[MONTHS[0]].people;
+const LAT = 68.696, LON = 15.413, TZ = 120; /* Sortland, CEST */
+
+let month = MONTHS[0], dayIdx = 0, solo = null;
+
+const kind = s => s.s === null ? "day" : (s.s >= 18*60 ? "night" : (s.s >= 12*60 ? "eve" : "day"));
+const dur  = s => s.s === null ? 0 : (s.e >= s.s ? s.e - s.s : (1440 - s.s) + s.e);
+const days = () => DATA[month].days;
+const pct  = m => m / 1440 * 100;
+const hhmm = m => String(Math.floor(m/60)).padStart(2,"0") + ":" + String(Math.round(m)%60).padStart(2,"0");
+
+/* ---------- solhöjd över Sortland ---------- */
+const D2R = Math.PI/180;
+function elevation(ms){
+  const n = ms/86400000 + 2440587.5 - 2451545.0;
+  const L = (280.460 + 0.9856474*n) % 360;
+  const g = ((357.528 + 0.9856003*n) % 360) * D2R;
+  const lam = (L + 1.915*Math.sin(g) + 0.020*Math.sin(2*g)) * D2R;
+  const eps = (23.439 - 0.0000004*n) * D2R;
+  const dec = Math.asin(Math.sin(eps)*Math.sin(lam));
+  const ra  = Math.atan2(Math.cos(eps)*Math.sin(lam), Math.cos(lam));
+  let gmst = (18.697374558 + 24.06570982441908*n) % 24; if(gmst < 0) gmst += 24;
+  const H = ((gmst + LON/15)*15 - ra/D2R) * D2R;
+  const phi = LAT*D2R;
+  return Math.asin(Math.sin(phi)*Math.sin(dec) + Math.cos(phi)*Math.cos(dec)*Math.cos(H)) / D2R;
+}
+function skyColor(e){
+  if(e >=  6) return "#17567D";
+  if(e >=  0) return "#1B4A6C";
+  if(e >= -6) return "#123A56";
+  if(e >= -12) return "#0D2B41";
+  return "#082032";
+}
+function sun(dateStr){
+  const [Y,M,D] = dateStr.split("-").map(Number);
+  const stops = [], samples = [];
+  for(let i = 0; i <= 48; i++){
+    const min = i*30;
+    const e = elevation(Date.UTC(Y, M-1, D, 0, min - TZ));
+    samples.push(e);
+    stops.push(skyColor(e) + " " + pct(min).toFixed(2) + "%");
+  }
+  /* fin upplösning för upp-/nedgång */
+  let rise = null, set = null, prev = null, min = 99, max = -99;
+  for(let m = 0; m <= 1440; m += 2){
+    const e = elevation(Date.UTC(Y, M-1, D, 0, m - TZ));
+    min = Math.min(min, e); max = Math.max(max, e);
+    if(prev !== null){
+      if(prev < -0.833 && e >= -0.833) rise = m;
+      if(prev >= -0.833 && e < -0.833) set = m;
+    }
+    prev = e;
+  }
+  return {grad: "linear-gradient(90deg," + stops.join(",") + ")", rise, set, min, max};
+}
+
+/* ---------- månadsknappar ---------- */
+const monthsEl = document.getElementById("months");
+MONTHS.forEach(m => {
+  const b = document.createElement("button");
+  b.textContent = m;
+  b.onclick = () => { month = m; dayIdx = 0; renderAll(); };
+  monthsEl.appendChild(b);
+});
+
+/* ---------- datumremsa ---------- */
+function renderStrip(){
+  const el = document.getElementById("strip");
+  el.innerHTML = "";
+  days().forEach((d, i) => {
+    const c = document.createElement("button");
+    c.className = "chip" + (["Lör","Sön"].includes(d.dow) ? " weekend" : "");
+    c.setAttribute("aria-selected", i === dayIdx);
+    const dots = PEOPLE.map(p => {
+      const l = d.shifts[p];
+      return l.length ? '<i style="background:var(--' + kind(l[0]) + ')"></i>' : '<i></i>';
+    }).join("");
+    c.innerHTML = '<span class="dw">' + d.dow + '</span><span class="dn">' +
+      Number(d.date.slice(8,10)) + '</span><span class="dots">' + dots + '</span>';
+    c.onclick = () => { dayIdx = i; renderDay(); syncStrip(); };
+    el.appendChild(c);
+  });
+}
+function syncStrip(){
+  const el = document.getElementById("strip");
+  [...el.children].forEach((c, i) => c.setAttribute("aria-selected", i === dayIdx));
+  const sel = el.children[dayIdx];
+  if(sel) el.scrollTo({left: sel.offsetLeft - el.clientWidth/2 + sel.clientWidth/2, behavior:"smooth"});
+  [...document.querySelectorAll("#grid tbody tr")].forEach((tr,i) => tr.classList.toggle("sel", i === dayIdx));
+}
+
+/* ---------- dagsribban ---------- */
+const LONG = {Mån:"Måndag",Tis:"Tisdag",Ons:"Onsdag",Tor:"Torsdag",Fre:"Fredag",Lör:"Lördag",Sön:"Söndag"};
+function renderDay(){
+  const d = days()[dayIdx], prev = days()[dayIdx - 1];
+  document.getElementById("dayTitle").textContent =
+    (LONG[d.dow] || d.dow) + " " + Number(d.date.slice(8,10)) + " " + MN[month];
+
+  const working = PEOPLE.filter(p => d.shifts[p].length);
+  const free = PEOPLE.filter(p => !d.shifts[p].length);
+  document.getElementById("summary").textContent =
+    working.length + " på jobbet · ledig: " + (free.length ? free.join(", ") : "ingen");
+
+  const s = sun(d.date);
+  const daylight = (s.rise !== null && s.set !== null) ? (s.set - s.rise + 1440) % 1440 : null;
+  document.getElementById("light").innerHTML = s.min > -0.833
+    ? '<span class="sun">Midnattssol</span> · solen går inte ner'
+    : (s.rise === null || s.set === null
+        ? 'Skymningsljus hela dygnet'
+        : (s.set < s.rise
+            ? '<span class="sun">Solen nere</span> ' + hhmm(s.set) + '–' + hhmm(s.rise) +
+              ' · ' + hhmm(daylight) + ' h dagsljus'
+            : '<span class="sun">Sol</span> ' + hhmm(s.rise) + '–' + hhmm(s.set) +
+              ' · ' + hhmm(daylight) + ' h dagsljus'));
+
+  const rows = document.getElementById("rows");
+  rows.style.setProperty("--sky", s.grad);
+  rows.innerHTML = "";
+  PEOPLE.forEach(p => {
+    const r = document.createElement("div");
+    r.className = "row" + (solo === p ? " on" : "");
+    r.tabIndex = 0;
+    r.onclick = () => { solo = (solo === p ? null : p); renderDay(); renderNow(); };
+    r.onkeydown = e => { if(e.key === "Enter" || e.key === " "){ e.preventDefault(); r.click(); } };
+
+    let bars = "";
+    if(prev) (prev.shifts[p] || []).forEach(x => {
+      if(x.s !== null && x.e < x.s)
+        bars += '<div class="bar night spill" style="width:' + pct(x.e) + '%"><span>till ' + x.end + '</span></div>';
+    });
+    d.shifts[p].forEach(x => {
+      if(x.s === null){ bars += '<div class="bar day" style="left:0;width:100%">' + x.code + '</div>'; return; }
+      const wraps = x.e < x.s;
+      const w = wraps ? (1440 - x.s) : (x.e - x.s);
+      bars += '<div class="bar ' + kind(x) + (dur(x) >= 600 ? " long" : "") +
+              '" style="left:' + pct(x.s) + '%;width:' + pct(w) + '%">' +
+              '<span>' + x.code + ' ' + x.start + '–' + x.end + '</span>' +
+              (wraps ? '<span class="cont">→</span>' : '') + '</div>';
+    });
+    if(!bars) bars = '<span class="free">ledig</span>';
+
+    r.innerHTML = '<div class="who">' + p + '</div><div class="track">' + bars + '</div>';
+    rows.appendChild(r);
+  });
+  document.querySelector(".wrap").classList.toggle("soloing", !!solo);
+}
+
+/* ---------- månadsrutnät ---------- */
+function renderGrid(){
+  document.getElementById("monthHead").textContent = "Hela " + MN[month];
+  const t = document.getElementById("grid");
+  t.innerHTML = "<thead><tr><th></th><th>" + PEOPLE.map(p => p.slice(0,3)).join("</th><th>") + "</th></tr></thead>";
+  const tb = document.createElement("tbody");
+  days().forEach((d, i) => {
+    const tr = document.createElement("tr");
+    tr.className = (["Lör","Sön"].includes(d.dow) ? "we " : "") + (i === dayIdx ? "sel" : "");
+    let tds = "<td>" + d.dow + " " + Number(d.date.slice(8,10)) + "</td>";
+    PEOPLE.forEach(p => {
+      const l = d.shifts[p];
+      tds += '<td><div class="cell">' +
+             (l.length ? l.map(x => '<b class="' + kind(x) + '"></b>').join("") : "<b></b>") +
+             '</div></td>';
+    });
+    tr.innerHTML = tds;
+    tr.onclick = () => {
+      dayIdx = i; renderDay(); syncStrip(); renderNow();
+      document.querySelector(".daybar").scrollIntoView({behavior:"smooth", block:"start"});
+    };
+    tb.appendChild(tr);
+  });
+  t.appendChild(tb);
+}
+
+/* ---------- nu-linje ---------- */
+function renderNow(){
+  document.querySelectorAll(".now").forEach(n => n.remove());
+  const t = new Date();
+  const iso = t.getFullYear() + "-" + String(t.getMonth()+1).padStart(2,"0") + "-" + String(t.getDate()).padStart(2,"0");
+  if(days()[dayIdx].date !== iso) return;
+  const left = pct(t.getHours()*60 + t.getMinutes());
+  document.querySelectorAll(".track").forEach(tr => {
+    const n = document.createElement("div");
+    n.className = "now"; n.style.left = left + "%";
+    tr.appendChild(n);
+  });
+}
+
+function renderAll(){
+  [...monthsEl.children].forEach(b => b.setAttribute("aria-pressed", b.textContent === month));
+  const t = new Date();
+  const iso = t.getFullYear() + "-" + String(t.getMonth()+1).padStart(2,"0") + "-" + String(t.getDate()).padStart(2,"0");
+  const i = days().findIndex(d => d.date === iso);
+  if(i > -1) dayIdx = i;
+  renderStrip(); renderGrid(); renderDay(); syncStrip(); renderNow();
+}
+
+document.getElementById("prev").onclick = () => { if(dayIdx > 0){ dayIdx--; renderDay(); syncStrip(); renderNow(); } };
+document.getElementById("next").onclick = () => { if(dayIdx < days().length-1){ dayIdx++; renderDay(); syncStrip(); renderNow(); } };
+
+document.getElementById("foot").innerHTML =
+  "Byggt från Sorre-schema.xlsx · " + PEOPLE.length + " personer · " +
+  MONTHS.map(m => DATA[m].days.length + " dagar i " + MN[m]).join(", ") +
+  ".<br>Ljuset räknas ut för 68,696° N, 15,413° Ö (Sortland) i norsk sommartid.";
+
+renderAll();
+</script>
+</body>
+</html>
