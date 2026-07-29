@@ -145,10 +145,54 @@ h1 em{font-style:normal;color:var(--facade)}
 .grid tbody tr.sel td:first-child{color:var(--text)}
 
 footer{margin-top:34px;font-size:10.5px;color:var(--muted);line-height:1.7;border-top:1px solid var(--rule);padding-top:14px}
+
+/* ---------- välkomstruta ---------- */
+body.modal-open{overflow:hidden}
+.overlay{
+  position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;
+  padding:20px;background:rgba(7,23,38,.88);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+  animation:fade .25s ease-out
+}
+.overlay[hidden]{display:none}
+.modal{
+  position:relative;max-width:min(560px,100%);max-height:100%;display:flex;flex-direction:column;
+  background:var(--surface);border:1px solid var(--rule);border-radius:16px;overflow:hidden;
+  box-shadow:0 24px 64px rgba(0,0,0,.6);animation:rise .28s cubic-bezier(.2,.9,.3,1)
+}
+.modal img{display:block;width:100%;height:auto;max-height:70vh;object-fit:contain;background:var(--ground)}
+.modal .cap{padding:14px 16px 16px}
+.modal .cap p{margin:0;font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.modal .cap h3{font-family:var(--display);font-weight:800;font-size:20px;letter-spacing:-.02em;margin:6px 0 0}
+.modal .go{
+  margin-top:14px;width:100%;padding:12px;border-radius:11px;border:1px solid var(--facade);
+  background:var(--surface-2);color:var(--text);font-family:var(--body);font-weight:600;font-size:14px;cursor:pointer
+}
+.modal .go:hover{background:var(--facade);color:#071726}
+.modal .x{
+  position:absolute;top:10px;right:10px;width:34px;height:34px;border-radius:50%;
+  border:1px solid var(--rule);background:rgba(7,23,38,.7);color:var(--text);
+  font-size:18px;line-height:1;cursor:pointer
+}
+.modal .x:hover{background:var(--ground)}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+@keyframes rise{from{opacity:0;transform:translateY(14px) scale(.97)}to{opacity:1;transform:none}}
+
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
 <body>
+
+<div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="popupTitle" hidden>
+  <div class="modal">
+    <button class="x" id="popupClose" aria-label="Stäng">×</button>
+    <img src="lucas-in-india.png" alt="Lucas i India">
+    <div class="cap">
+      <p class="kicker">Hälsning</p>
+      <h3 id="popupTitle">Lucas i India</h3>
+      <button class="go" id="popupOk">Vidare till schemat</button>
+    </div>
+  </div>
+</div>
 
 <svg class="pano" viewBox="0 0 800 210" role="img" aria-label="Sortlandsundet med fjäll, blå husfasader och Sortlandsbrua">
   <defs>
@@ -464,6 +508,38 @@ document.getElementById("foot").innerHTML =
   ".<br>Ljuset räknas ut för 68,696° N, 15,413° Ö (Sortland) i norsk sommartid.";
 
 renderAll();
+
+/* ---------- välkomstruta ---------- */
+(function(){
+  const ov = document.getElementById("overlay");
+  const close = document.getElementById("popupClose");
+  const prevFocus = document.activeElement;
+
+  ov.hidden = false;
+  document.body.classList.add("modal-open");
+  document.getElementById("popupOk").focus();
+
+  function dismiss(){
+    ov.hidden = true;
+    document.body.classList.remove("modal-open");
+    document.removeEventListener("keydown", onKey);
+    if(prevFocus && prevFocus.focus) prevFocus.focus();
+  }
+  function onKey(e){
+    if(e.key === "Escape"){ dismiss(); return; }
+    if(e.key !== "Tab") return;
+    /* håll fokus inne i rutan */
+    const f = [close, document.getElementById("popupOk")];
+    const i = f.indexOf(document.activeElement);
+    e.preventDefault();
+    f[(i + (e.shiftKey ? f.length - 1 : 1) + f.length) % f.length].focus();
+  }
+
+  close.onclick = dismiss;
+  document.getElementById("popupOk").onclick = dismiss;
+  ov.onclick = e => { if(e.target === ov) dismiss(); };
+  document.addEventListener("keydown", onKey);
+})();
 </script>
 </body>
 </html>
