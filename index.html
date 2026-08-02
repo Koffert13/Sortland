@@ -82,6 +82,7 @@ h1 em{font-style:normal;color:var(--facade)}
   width:34px;height:34px;border-radius:10px;border:1px solid var(--rule);
   background:var(--surface);color:var(--text);font-size:15px;cursor:pointer;line-height:1
 }
+.arrows button:disabled{opacity:.3;cursor:default}
 .meta{font-family:var(--mono);font-size:11px;color:var(--muted);margin:0 0 3px;line-height:1.6}
 .meta .sun{color:var(--day)}
 .axis{
@@ -308,6 +309,25 @@ const kind = s => s.s === null ? "day" : (s.s >= 18*60 ? "night" : (s.s >= 12*60
 const dur  = s => s.s === null ? 0 : (s.e >= s.s ? s.e - s.s : (1440 - s.s) + s.e);
 const days = () => DATA[month].days;
 const pct  = m => m / 1440 * 100;
+
+/* alla dagar i följd, så vi kan gå över månadsskiftet */
+const ALL = MONTHS.flatMap(m => DATA[m].days.map(d => ({month: m, day: d})));
+const todayISO = () => {
+  const t = new Date();
+  return t.getFullYear() + "-" + String(t.getMonth()+1).padStart(2,"0") + "-" + String(t.getDate()).padStart(2,"0");
+};
+/* grannen `step` dagar bort, oavsett vilken månad den ligger i */
+function neighbour(step){
+  const i = ALL.findIndex(x => x.day.date === days()[dayIdx].date);
+  return i < 0 ? null : (ALL[i + step] || null);
+}
+function goDay(step){
+  const t = neighbour(step);
+  if(!t) return;
+  dayIdx = DATA[t.month].days.indexOf(t.day);
+  if(t.month !== month){ month = t.month; renderMonth(); }
+  else { renderDay(); syncStrip(); renderNow(); }
+}
 const hhmm = m => String(Math.floor(m/60)).padStart(2,"0") + ":" + String(Math.round(m)%60).padStart(2,"0");
 
 /* ---------- solhöjd över Sortland ---------- */
@@ -360,7 +380,12 @@ const monthsEl = document.getElementById("months");
 MONTHS.forEach(m => {
   const b = document.createElement("button");
   b.textContent = m;
-  b.onclick = () => { month = m; dayIdx = 0; renderAll(); };
+  b.onclick = () => {
+    month = m;
+    const i = days().findIndex(d => d.date === todayISO());
+    dayIdx = i > -1 ? i : 0;
+    renderMonth();
+  };
   monthsEl.appendChild(b);
 });
 
@@ -393,7 +418,9 @@ function syncStrip(){
 /* ---------- dagsribban ---------- */
 const LONG = {Mån:"Måndag",Tis:"Tisdag",Ons:"Onsdag",Tor:"Torsdag",Fre:"Fredag",Lör:"Lördag",Sön:"Söndag"};
 function renderDay(){
-  const d = days()[dayIdx], prev = days()[dayIdx - 1];
+  const d = days()[dayIdx], prev = (neighbour(-1) || {}).day;
+  document.getElementById("prev").disabled = !neighbour(-1);
+  document.getElementById("next").disabled = !neighbour(1);
   document.getElementById("dayTitle").textContent =
     (LONG[d.dow] || d.dow) + " " + Number(d.date.slice(8,10)) + " " + MN[month];
 
@@ -486,17 +513,24 @@ function renderNow(){
   });
 }
 
-function renderAll(){
+/* ritar om allt för vald månad och dag */
+function renderMonth(){
   [...monthsEl.children].forEach(b => b.setAttribute("aria-pressed", b.textContent === month));
-  const t = new Date();
-  const iso = t.getFullYear() + "-" + String(t.getMonth()+1).padStart(2,"0") + "-" + String(t.getDate()).padStart(2,"0");
-  const i = days().findIndex(d => d.date === iso);
-  if(i > -1) dayIdx = i;
   renderStrip(); renderGrid(); renderDay(); syncStrip(); renderNow();
 }
+/* som ovan, men börjar på dagens datum om det finns i schemat */
+function renderAll(){
+  const hit = ALL.find(x => x.day.date === todayISO());
+  if(hit){ month = hit.month; dayIdx = DATA[hit.month].days.indexOf(hit.day); }
+  renderMonth();
+}
 
-document.getElementById("prev").onclick = () => { if(dayIdx > 0){ dayIdx--; renderDay(); syncStrip(); renderNow(); } };
-document.getElementById("next").onclick = () => { if(dayIdx < days().length-1){ dayIdx++; renderDay(); syncStrip(); renderNow(); } };
+document.getElementById("prev").onclick = () => goDay(-1);
+document.getElementById("next").onclick = () => goDay(1);
+
+/* nu-linjen ska följa klockan, inte bara sidladdningen */
+setInterval(renderNow, 60000);
+document.addEventListener("visibilitychange", () => { if(!document.hidden) renderNow(); });
 
 document.getElementById("foot").innerHTML =
   "Byggt från Sorre-schema.xlsx · " + PEOPLE.length + " personer · " +
